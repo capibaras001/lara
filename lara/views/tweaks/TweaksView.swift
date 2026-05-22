@@ -19,10 +19,8 @@ struct TweaksView: View {
                         .disabled(!mgr.rcready)
                     NavigationLink("Liquid Glass", destination: LiquidGlassView())
                         .disabled(!mgr.vfsready)
-                    if doubleSystemVersion() < 26.0 {
-                        NavigationLink("SB Customizer", destination: SpringBoardView(mgr: mgr))
-                            .disabled(!mgr.vfsready)
-                    }
+                    NavigationLink("SpringBoard Customizer", destination: SpringBoardView(mgr: mgr))
+                        .disabled(!mgr.vfsready)
                 }
                 
                 Section(header: HeaderLabel(text: "Lock Screen", icon: "lock")) {

@@ -30,37 +30,36 @@ enum OverwritingFileTypes {
 
 
 struct GeneralOption: Identifiable {
-        var value: String
-        var id = UUID()
-        var key: String
-        var sbType: SpringboardColorManager.SpringboardType?
-        var title: String
-        var shortTitle: String?
-        var imageName: String
-        var fileType: OverwritingFileTypes
-        var options: [String] = []
-        var selectedOption: String = "Visible"
-        
-        var minimumOS: Int = 14
-        
-        var color: Color = Color.gray
-        var blur: Double = 30
-    }
+    var value: String
+    var id = UUID()
+    var key: String
+    var sbType: SpringboardColorManager.SpringboardType?
+    var title: String
+    var shortTitle: String?
+    var imageName: String
+    var fileType: OverwritingFileTypes
+    var options: [String] = []
+    var selectedOption: String = "Visible"
+    
+    var maxVers: Double = 18.9
+    
+    var color: Color = Color.gray
+    var blur: Double = 30
+}
 
 struct SpringBoardView: View {
     // list of options
     @State var tweakOptions: [GeneralOption] = [
         .init(value: getDefaultStr(forKey: "Dock"), key: "Dock", sbType: .dock, title: NSLocalizedString("Dock", comment: "Springboard tool"), imageName: "dock.rectangle", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
-        .init(value: getDefaultStr(forKey: "HomeBar"), key: "HomeBar", title: NSLocalizedString("Home Bar", comment: "Springboard tool"), imageName: "iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Disabled"]),
+        .init(value: getDefaultStr(forKey: "HomeBar"), key: "HomeBar", title: NSLocalizedString("Home Bar", comment: "Springboard tool"), imageName: "iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Disabled"], maxVers: 26.0),
         .init(value: getDefaultStr(forKey: "FolderBG"), key: "FolderBG", sbType: .folder, title: NSLocalizedString("Folder Background", comment: "Springboard tool"), imageName: "folder", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
         .init(value: getDefaultStr(forKey: "FolderBlur"), key: "FolderBlur", sbType: .folderBG, title: NSLocalizedString("Folder Blur", comment: "Springboard tool"), imageName: "folder.circle", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
         .init(value: getDefaultStr(forKey: "CCModuleBG"), key: "CCModuleBG", sbType: .module, title: NSLocalizedString("CC Module Background", comment: "Springboard tool"), shortTitle: "CC Module BG", imageName: "switch.2", fileType: OverwritingFileTypes.cc, options: ["Visible", "Color", "Disabled"]),
         .init(value: getDefaultStr(forKey: "CCBG"), key: "CCBG", sbType: .moduleBG, title: NSLocalizedString("CC Background Blur", comment: "Springboard tool"), imageName: "switch.2", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
-        .init(value: getDefaultStr(forKey: "Switcher"), key: "Switcher", sbType: .switcher, title: NSLocalizedString("App Switcher Blur", comment: "Springboard tool"), imageName: "apps.iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Blur", "Disabled"]),
+        .init(value: getDefaultStr(forKey: "Switcher"), key: "Switcher", sbType: .switcher, title: NSLocalizedString("App Switcher Blur", comment: "Springboard tool"), imageName: "apps.iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Blur", "Disabled"], maxVers: 26.0),
         .init(value: getDefaultStr(forKey: "PodBG"), key: "PodBG", sbType: .libraryFolder, title: NSLocalizedString("Library Pod Background", comment: "Springboard tool"), shortTitle: "Library Pod BG", imageName: "square.stack", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
         .init(value: getDefaultStr(forKey: "NotifBG"), key: "NotifBG", sbType: .notif, title: NSLocalizedString("Notification Banner Background", comment: "Springboard tool"), shortTitle: "Notification BG", imageName: "platter.filled.top.iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
         .init(value: getDefaultStr(forKey: "NotifShadow"), key: "NotifShadow", sbType: .notifShadow, title: NSLocalizedString("Notification Banner Shadow", comment: "Springboard tool"), shortTitle: "Notification Shadow", imageName: "platter.filled.top.iphone", fileType: OverwritingFileTypes.springboard, options: ["Visible", "Color", "Disabled"]),
-//        .init(value: getDefaultStr(forKey: "ShortcutBanner"), key: "ShortcutBanner", title: NSLocalizedString("Shortcut Notification Banner", comment: "Springboard tool"), imageName: "pencil.slash", fileType: .springboard, options: ["Visible", "Disabled"], minimumOS: 16)
     ]
 
     let mgr: laramgr
@@ -93,54 +92,56 @@ struct SpringBoardView: View {
                     }
                 }
                 ForEach($tweakOptions) { $option in
-                    Section(header: HeaderLabel(text: option.title, icon: option.imageName)) {
-                        Picker("Option", selection: $option.selectedOption) {
-                            ForEach(0..<option.options.count) { ind in
-                                Text(option.options[ind]).tag(option.options[ind])
+                    if doubleSystemVersion() <= option.maxVers {
+                        Section(header: HeaderLabel(text: option.title, icon: option.imageName)) {
+                            Picker("Option", selection: $option.selectedOption) {
+                                ForEach(0..<option.options.count) { ind in
+                                    Text(option.options[ind]).tag(option.options[ind])
+                                }
                             }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.segmented)
-                        .onChange(of: option.selectedOption) { newvalue in
-                            option.value = newvalue
-                            UserDefaults.standard.set(newvalue, forKey: option.key)
-                        }
-                        if option.selectedOption == "Color" || option.selectedOption == "Blur" {
-                            if option.selectedOption == "Color" {
-                                HStack(spacing: 12) {
-                                    Text("Color")
+                            .labelsHidden()
+                            .pickerStyle(.segmented)
+                            .onChange(of: option.selectedOption) { newvalue in
+                                option.value = newvalue
+                                UserDefaults.standard.set(newvalue, forKey: option.key)
+                            }
+                            if option.selectedOption == "Color" || option.selectedOption == "Blur" {
+                                if option.selectedOption == "Color" {
+                                    HStack(spacing: 12) {
+                                        Text("Color")
+                                        Spacer()
+                                        Text(colortohex(option.color))
+                                            .monospaced()
+                                            .foregroundColor(.secondary)
+                                        ColorPicker("Set notification banner color", selection: $option.color)
+                                            .labelsHidden()
+                                            .frame(width: 40)
+                                            .onChange(of: option.color) { newcolor in
+                                                do {
+                                                    try SpringboardColorManager.createColor(forType: option.sbType!, color: CIColor(color: UIColor(newcolor)), blur: Int(option.blur), asTemp: false)
+                                                    print("Success")
+                                                } catch {
+                                                    print(error.localizedDescription)
+                                                }
+                                            }
+                                    }
+                                }
+                                HStack {
+                                    Text("Blur:")
                                     Spacer()
-                                    Text(colortohex(option.color))
+                                    Text("\(Int(option.blur))")
                                         .monospaced()
                                         .foregroundColor(.secondary)
-                                    ColorPicker("Set notification banner color", selection: $option.color)
-                                        .labelsHidden()
-                                        .frame(width: 40)
-                                        .onChange(of: option.color) { newcolor in
-                                            do {
-                                                try SpringboardColorManager.createColor(forType: option.sbType!, color: CIColor(color: UIColor(newcolor)), blur: Int(option.blur), asTemp: false)
-                                                print("Success")
-                                            } catch {
-                                                print(error.localizedDescription)
-                                            }
-                                        }
                                 }
+                                Slider(value: $option.blur, in: 0...150, step: 1.0, onEditingChanged: { _ in
+                                    do {
+                                        try SpringboardColorManager.createColor(forType: option.sbType!, color: CIColor(color: UIColor(option.color)), blur: Int(option.blur), asTemp: false)
+                                        print("Success")
+                                    } catch {
+                                        print(error.localizedDescription)
+                                    }
+                                })
                             }
-                            HStack {
-                                Text("Blur:")
-                                Spacer()
-                                Text("\(Int(option.blur))")
-                                    .monospaced()
-                                    .foregroundColor(.secondary)
-                            }
-                            Slider(value: $option.blur, in: 0...150, step: 1.0, onEditingChanged: { _ in
-                                do {
-                                    try SpringboardColorManager.createColor(forType: option.sbType!, color: CIColor(color: UIColor(option.color)), blur: Int(option.blur), asTemp: false)
-                                    print("Success")
-                                } catch {
-                                    print(error.localizedDescription)
-                                }
-                            })
                         }
                     }
                 }
