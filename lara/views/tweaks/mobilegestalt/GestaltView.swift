@@ -433,7 +433,7 @@ struct GestaltView: View {
             
             // bro please dont bootloop
             let mgData = try verifyPlist(mgCurrentDict, targetPath: mgCurrentPath)
-            let result = mgr.lara_overwritefile(target: mgCurrentPath, data: mgData)
+            let result = mgr.lara_overwritefile(target: mgCurrentPath, data: mgData, fallback_vfs: false)
             
             if result.ok {
                 Alertinator.shared.alert(title: "Successfully applied MobileGestalt!", body: "Respring to see any changes", actionLabel: "Respring", action: { mgr.respring() })
