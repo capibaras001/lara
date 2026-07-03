@@ -12,7 +12,8 @@ xcodebuild \
   -scheme lara \
   -configuration Debug \
   -sdk iphoneos \
-  -arch arm64e \
+  -arch arm64 \
+  IPHONEOS_DEPLOYMENT_TARGET=16.0 \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY="" \
